@@ -19,12 +19,13 @@
 </head>
 <body>
 
-    <main class="login-container">
-        <section class="login-card">
-            <h1>Filmes</h1>
+    <main class="principal-container">
+        <div class="topbar">
+            <span class="topbar-title">Filmes</span>
+            <a href="criar.php"><button style="width:auto; padding: 9px 18px; margin:0;">+ Novo Filme</button></a>
+        </div>
 
-            <a href="criar.php"><button>Novo Filme</button></a>
-
+        <div style="background:#fff; border:1px solid #ebebeb; border-radius:12px; padding: 8px 0;">
             <table>
                 <thead>
                     <tr>
@@ -54,9 +55,9 @@
                     <?php endwhile; ?>
                 </tbody>
             </table>
+        </div>
 
-            <a href="../principal.php">Voltar</a>
-        </section>
+        <a href="../principal.php" style="display:inline-block; margin-top:16px; font-size:13px; color:#888; text-decoration:none;">← Voltar</a>
     </main>
 
 </body>
