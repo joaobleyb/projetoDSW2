@@ -1,5 +1,5 @@
 <?php
-require_once "verificar_login.php";
+    require_once "verificar_login.php";
 ?>
 
 <!DOCTYPE html>
@@ -15,13 +15,11 @@ require_once "verificar_login.php";
         <section class="login-card">
             <h1>Bem-vindo!</h1>
 
-            <p>
-                Olá, <?php echo $_SESSION["usuario_nome"]; ?>.
-            </p>
+            <p>Olá, <?php echo htmlspecialchars($_SESSION["usuario_nome"]); ?>.</p>
 
-            <a href="logout.php">
-                <button>Sair</button>
-            </a>
+            <a href="filmes/listar.php"><button>Gerenciar Filmes</button></a>
+            <a href="generos/listar.php"><button>Gerenciar Gêneros</button></a>
+            <a href="logout.php"><button>Sair</button></a>
         </section>
     </main>
 
