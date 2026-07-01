@@ -1,44 +1,60 @@
 <?php
-require_once "../verificar_login.php";
-require_once "../conexao.php";
+    require_once("../verificar_login.php");
+    require_once("../conexao.php");
 
-$erro = "";
+    // recupera o id do gênero que vem pela url e converte para inteiro - boa prática
+    $id = filter_var($_GET["id"], FILTER_VALIDATE_INT);
 
-// Busca o gênero pelo ID
-$id = isset($_GET["id"]) ? (int) $_GET["id"] : 0;
+    $sql = "SELECT * FROM generos WHERE id = ?";
 
-$sql = "SELECT * FROM generos WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$resultado = $stmt->get_result();
+    $stmt = mysqli_prepare($conn, $sql);
 
-if ($resultado->num_rows === 0) {
-    header("Location: listar.php");
-    exit;
-}
+    mysqli_stmt_bind_param($stmt, "i", $id);
 
-$genero = $resultado->fetch_assoc();
+    mysqli_stmt_execute($stmt);
 
-// Processa o formulário
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $nome = trim($_POST["genero"]);
+    $resultado = mysqli_stmt_get_result($stmt);
 
-    if (empty($nome)) {
-        $erro = "O campo gênero é obrigatório.";
-    } else {
-        $sql = "UPDATE generos SET genero = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("si", $nome, $id);
+    if (mysqli_num_rows($resultado) !== 1) {
+        $_SESSION["msg"] = "Gênero não encontrado.";
+        $_SESSION["cor"] = "red";
 
-        if ($stmt->execute()) {
-            header("Location: listar.php");
-            exit;
-        } else {
-            $erro = "Erro ao atualizar gênero.";
-        }
+        header("Location: listar.php");
+        exit;
     }
-}
+
+    $genero = mysqli_fetch_array($resultado);
+
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+        $nome = trim($_POST["genero"]);
+
+        if (empty($nome)) {
+            $_SESSION["msg"] = "O campo gênero é obrigatório.";
+            $_SESSION["cor"] = "red";
+        } else {
+            $sql_update = "UPDATE generos SET genero = ? WHERE id = ?";
+
+            $stmt_update = mysqli_prepare($conn, $sql_update);
+
+            mysqli_stmt_bind_param($stmt_update, "si", $nome, $id);
+
+            try {
+                mysqli_stmt_execute($stmt_update);
+
+                $_SESSION["msg"] = "Gênero atualizado com sucesso!";
+                $_SESSION["cor"] = "green";
+
+                header("Location: listar.php");
+                exit;
+            } catch (mysqli_sql_exception $e) {
+                $_SESSION["msg"] = "Erro ao atualizar gênero.";
+                $_SESSION["cor"] = "red";
+            }
+        }
+
+        // mantém o dado digitado na tela em caso de erro
+        $genero["genero"] = $nome;
+    }
 ?>
 
 <!DOCTYPE html>
@@ -54,8 +70,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <section class="login-card">
             <h1>Editar Gênero</h1>
 
-            <?php if ($erro): ?>
-                <div class="erro"><?php echo $erro; ?></div>
+            <?php if (isset($_SESSION["msg"])): ?>
+                <div class="erro" style="<?= $_SESSION["cor"] === "red" ? "" : "background:#f0fff4; color:#2f7a3d; border-color:#c6f0cf;"; ?>">
+                    <?= $_SESSION["msg"]; ?>
+                </div>
+                <?php
+                    unset($_SESSION["msg"]);
+                    unset($_SESSION["cor"]);
+                ?>
             <?php endif; ?>
 
             <form action="editar.php?id=<?php echo $id; ?>" method="POST">

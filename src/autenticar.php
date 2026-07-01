@@ -1,19 +1,30 @@
 <?php
     session_start();
-    require_once "conexao.php";
+    require_once("conexao.php");
 
     $email = $_POST["email"];
     $senha = $_POST["senha"];
 
+    // consulta a ser utilizada
     $sql = "SELECT * FROM usuarios WHERE email = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
 
-    $resultado = $stmt->get_result();
+    // inicia a consulta SQL antes da execução
+    $stmt = mysqli_prepare($conn, $sql);
 
-    if ($resultado->num_rows === 1) {
-        $usuario = $resultado->fetch_assoc();
+    // define o parâmetro da consulta (?)
+    // s - string
+    mysqli_stmt_bind_param($stmt, "s", $email);
+
+    // executa a consulta sql com o valor que foi adicionado à query
+    mysqli_stmt_execute($stmt);
+
+    // recupera o resultado produzido pela execução da prepared statement
+    $resultado = mysqli_stmt_get_result($stmt);
+
+    if (mysqli_num_rows($resultado) === 1) {
+
+        // encontrou um usuário com esse e-mail
+        $usuario = mysqli_fetch_array($resultado);
 
         if (password_verify($senha, $usuario["senha"])) {
             $_SESSION["usuario_id"] = $usuario["id"];
@@ -24,6 +35,10 @@
         }
     }
 
-    header("Location: login.php?erro=1");
+    // se chegou até aqui, e-mail ou senha estão incorretos
+    $_SESSION["msg"] = "Email ou senha inválidos.";
+    $_SESSION["cor"] = "red";
+
+    header("Location: login.php");
     exit;
 ?>

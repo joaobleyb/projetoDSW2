@@ -5,8 +5,6 @@
         header("Location: principal.php");
         exit;
     }
-
-    $erro = isset($_GET["erro"]);
 ?>
 
 <!DOCTYPE html>
@@ -23,10 +21,15 @@
             <h1>Login</h1>
             <p>Entre para acessar o sistema</p>
 
-            <?php if ($erro): ?>
-                <div class="erro">
-                    Email ou senha inválidos.
+            <?php if (isset($_SESSION["msg"])): ?>
+                <div class="erro" style="<?= $_SESSION["cor"] === "red" ? "" : "background:#f0fff4; color:#2f7a3d; border-color:#c6f0cf;"; ?>">
+                    <?= $_SESSION["msg"]; ?>
                 </div>
+                <?php
+                    // limpa a mensagem para não aparecer novamente em outra visita à página
+                    unset($_SESSION["msg"]);
+                    unset($_SESSION["cor"]);
+                ?>
             <?php endif; ?>
 
             <form action="autenticar.php" method="POST">

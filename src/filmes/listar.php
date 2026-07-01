@@ -1,13 +1,13 @@
 <?php
-    require_once "../verificar_login.php";
-    require_once "../conexao.php";
+    require_once("../verificar_login.php");
+    require_once("../conexao.php");
 
     $sql = "SELECT filmes.*, generos.genero 
             FROM filmes 
             JOIN generos ON filmes.genero_id = generos.id
             ORDER BY filmes.titulo ASC";
 
-    $resultado = $conn->query($sql);
+    $resultado = mysqli_query($conn, $sql);
 ?>
 
 <!DOCTYPE html>
@@ -25,6 +25,16 @@
             <a href="criar.php"><button style="width:auto; padding: 9px 18px; margin:0;">+ Novo Filme</button></a>
         </div>
 
+        <?php if (isset($_SESSION["msg"])): ?>
+            <div class="erro" style="<?= $_SESSION["cor"] === "red" ? "" : "background:#f0fff4; color:#2f7a3d; border-color:#c6f0cf;"; ?>">
+                <?= $_SESSION["msg"]; ?>
+            </div>
+            <?php
+                unset($_SESSION["msg"]);
+                unset($_SESSION["cor"]);
+            ?>
+        <?php endif; ?>
+
         <div style="background:#fff; border:1px solid #ebebeb; border-radius:12px; padding: 8px 0;">
             <table>
                 <thead>
@@ -39,7 +49,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($filme = $resultado->fetch_assoc()): ?>
+                    <?php while ($filme = mysqli_fetch_array($resultado)): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($filme["titulo"]); ?></td>
                             <td><?php echo htmlspecialchars($filme["diretor"]); ?></td>

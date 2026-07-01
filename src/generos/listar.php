@@ -1,8 +1,9 @@
 <?php
-require_once "../verificar_login.php";
-require_once "../conexao.php";
+    require_once("../verificar_login.php");
+    require_once("../conexao.php");
 
-$resultado = $conn->query("SELECT * FROM generos ORDER BY genero ASC");
+    $sql = "SELECT * FROM generos ORDER BY genero ASC";
+    $resultado = mysqli_query($conn, $sql);
 ?>
 
 <!DOCTYPE html>
@@ -20,6 +21,16 @@ $resultado = $conn->query("SELECT * FROM generos ORDER BY genero ASC");
             <a href="criar.php"><button style="width:auto; padding: 9px 18px; margin:0;">+ Novo Gênero</button></a>
         </div>
 
+        <?php if (isset($_SESSION["msg"])): ?>
+            <div class="erro" style="<?= $_SESSION["cor"] === "red" ? "" : "background:#f0fff4; color:#2f7a3d; border-color:#c6f0cf;"; ?>">
+                <?= $_SESSION["msg"]; ?>
+            </div>
+            <?php
+                unset($_SESSION["msg"]);
+                unset($_SESSION["cor"]);
+            ?>
+        <?php endif; ?>
+
         <div style="background:#fff; border:1px solid #ebebeb; border-radius:12px; padding: 8px 0;">
             <table>
                 <thead>
@@ -29,7 +40,7 @@ $resultado = $conn->query("SELECT * FROM generos ORDER BY genero ASC");
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($genero = $resultado->fetch_assoc()): ?>
+                    <?php while ($genero = mysqli_fetch_array($resultado)): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($genero["genero"]); ?></td>
                             <td>

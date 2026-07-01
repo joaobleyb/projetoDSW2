@@ -1,24 +1,31 @@
 <?php
-    require_once "../verificar_login.php";
-    require_once "../conexao.php";
-
-    $erro = "";
+    require_once("../verificar_login.php");
+    require_once("../conexao.php");
 
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $genero = trim($_POST["genero"]);
 
         if (empty($genero)) {
-            $erro = "O campo gênero é obrigatório.";
+            $_SESSION["msg"] = "O campo gênero é obrigatório.";
+            $_SESSION["cor"] = "red";
         } else {
             $sql = "INSERT INTO generos (genero) VALUES (?)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("s", $genero);
 
-            if ($stmt->execute()) {
+            $stmt = mysqli_prepare($conn, $sql);
+
+            mysqli_stmt_bind_param($stmt, "s", $genero);
+
+            try {
+                mysqli_stmt_execute($stmt);
+
+                $_SESSION["msg"] = "Gênero cadastrado com sucesso!";
+                $_SESSION["cor"] = "green";
+
                 header("Location: listar.php");
                 exit;
-            } else {
-                $erro = "Erro ao cadastrar gênero.";
+            } catch (mysqli_sql_exception $e) {
+                $_SESSION["msg"] = "Erro ao cadastrar gênero.";
+                $_SESSION["cor"] = "red";
             }
         }
     }
@@ -37,8 +44,14 @@
         <section class="login-card">
             <h1>Novo Gênero</h1>
 
-            <?php if ($erro): ?>
-                <div class="erro"><?php echo $erro; ?></div>
+            <?php if (isset($_SESSION["msg"])): ?>
+                <div class="erro" style="<?= $_SESSION["cor"] === "red" ? "" : "background:#f0fff4; color:#2f7a3d; border-color:#c6f0cf;"; ?>">
+                    <?= $_SESSION["msg"]; ?>
+                </div>
+                <?php
+                    unset($_SESSION["msg"]);
+                    unset($_SESSION["cor"]);
+                ?>
             <?php endif; ?>
 
             <form action="criar.php" method="POST">
